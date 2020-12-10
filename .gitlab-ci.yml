@@ -1,7 +1,6 @@
 stages:
   - test
   - build_static_assets
-  - build_docker_image
 
 variables:
   CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}:latest
@@ -16,9 +15,6 @@ variables:
     - yarn
 
 test:
-  only:
-    refs:
-      - master
   image: buildkite/puppeteer
   stage: test
   before_script:
@@ -32,9 +28,6 @@ test:
     - yarn test
 
 build_static_assets:
-  only:
-    refs:
-      - master
   extends: .js
   stage: build_static_assets
   script:
@@ -42,24 +35,3 @@ build_static_assets:
   artifacts:
     paths:
       - build/
-
-build_docker_image:
-  only:
-    refs:
-      - master
-  stage: build_docker_image
-  image: docker:latest
-  tags:
-    - dind
-  services:
-    - docker:dind
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
-    - docker --version
-    - echo ${CONTAINER_IMAGE}
-  script:
-    - docker build -t ${CONTAINER_IMAGE} --no-cache .
-    - docker image ls
-    - docker push ${CONTAINER_IMAGE}
-    - docker rmi ${CONTAINER_IMAGE}
-    - docker logout "$CI_REGISTRY"
