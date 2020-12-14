@@ -1,4 +1,4 @@
-1
+2
 
 ### Installing JavaScript Dependencies
 
